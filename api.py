@@ -3,8 +3,8 @@ import sqlite3
 
 app = Flask(__name__)
 
-@app.route('/create')
-def root():
+@app.route('/createdb')
+def createdb():
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS JOBS (
@@ -24,14 +24,22 @@ def root():
     #     'REMOTE'
     # )''')
 
-    db.commit()
-    cursor.execute('SELECT * FROM JOBS')
-    data = cursor.fetchall()
+    # db.commit()
+    # cursor.execute('SELECT * FROM JOBS')
+    # data = cursor.fetchall()
 
     db.close()
 
-    return str(data)
+    return ("DATABASES CREATED WITH TABLE NAMED: \"JOBS\" ")
 
+@app.route("/home")
+def root():
+    db = sqlite3.connect('jobPosts.db')
+    cursor = db.cursor()
+    cursor.execute('SELECT * FROM JOBS')
+    data = cursor.fetchall()
+    db.close()
+    return str(data)
 
 if __name__ == "__main__":
     app.run(debug = True, threaded = True)
