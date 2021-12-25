@@ -3,7 +3,7 @@ import sqlite3
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/create')
 def root():
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
@@ -16,8 +16,21 @@ def root():
         CREATED TEXT DEFAULT CURRENT_TIMESTAMP,
         UPDATED TEXT DEFAULT CURRENT_TIMESTAMP
     )''')
-    
-    return "WELCOME TO THE JOBS POSTING API"
+
+    # cursor.execute('''INSERT INTO JOBS (TITLE, DESCRIPTION, PAY, LOCATION) VALUES (
+    #     'Tester',
+    #     'I am a Tester',
+    #     10,
+    #     'REMOTE'
+    # )''')
+
+    db.commit()
+    cursor.execute('SELECT * FROM JOBS')
+    data = cursor.fetchall()
+
+    db.close()
+
+    return str(data)
 
 
 if __name__ == "__main__":
