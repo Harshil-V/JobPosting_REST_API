@@ -1,6 +1,7 @@
 from flask import Flask
+from flask import request
 import sqlite3
-
+import json
 app = Flask(__name__)
 
 @app.route('/createdb')
@@ -32,19 +33,38 @@ def createdb():
 
     return ("DATABASES CREATED WITH TABLE NAMED: \"JOBS\" ")
 
+
+"FORMAT : http://127.0.0.1:5000/add?TITLE=___&DESCRIPTION=____&PAY=___&LOCATION=___"
 @app.route("/home")
 def root():
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
+
     cursor.execute('SELECT * FROM JOBS')
     data = cursor.fetchall()
+
     db.close()
-    for row in data:
-        print(row)
+
     return str(data)
 
-# @
-# def add():
+@app.route("/add")
+def add():
+    db = sqlite3.connect('jobPosts.db')
+    cursor = db.cursor()
+
+    TITLE = request.args.get('TITLE')
+    DESCRIPTION = request.args.get('DESCRIPTION')
+    PAY = request.args.get('PAY')
+    LOCATION = request.args.get('LOCATION')
+
+    cursor.execute('''INSERT INTO JOBS (TITLE, DESCRIPTION, PAY, LOCATION) VALUES (
+        '%s',
+        '%s',
+        %s,
+        '%s'
+    )''' % (TITLE, DESCRIPTION, PAY, LOCATION))
+    db.commit()
+    return "TITLE: {} | DESCRIPTION: {} | PAY: {} | LOCATION: {}".format(TITLE, DESCRIPTION, str(PAY), LOCATION)
 
 if __name__ == "__main__":
     app.run(debug = True, threaded = True)
