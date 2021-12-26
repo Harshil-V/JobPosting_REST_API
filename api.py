@@ -89,16 +89,16 @@ def update(id):
     db.close()
     return "Updated ID:{} with --> TITLE: {} | DESCRIPTION: {} | PAY: {} | LOCATION: {}".format(id, TITLE, DESCRIPTION, str(PAY), LOCATION)
 
-# @app.route("/delete/<id>")
-# def delete(id):
-#     db = sqlite3.connect('jobPosts.db')
-#     cursor = db.cursor()
+@app.route("/delete/<id>")
+def delete(id):
+    db = sqlite3.connect('jobPosts.db')
+    cursor = db.cursor()
 
-#     cursor.execute("DELETE FROM JOBS WHERE Id=%s" % id)
-#     db.commit()
+    cursor.execute("DELETE FROM JOBS WHERE Id=%s" % id)
+    db.commit()
 
-#     db.close()
-#     return "Deleted Entry with ID:{}".format(id)
+    db.close()
+    return "Deleted Entry with ID:{}".format(id)
 
 
 if __name__ == "__main__":
