@@ -2,6 +2,8 @@ from flask import Flask
 from flask import request
 import sqlite3
 import json
+
+
 app = Flask(__name__)
 
 @app.route('/createdb')
@@ -32,7 +34,6 @@ def createdb():
     db.close()
 
     return ("DATABASES CREATED WITH TABLE NAMED: \"JOBS\" ")
-
 
 "FORMAT : http://127.0.0.1:5000/add?TITLE=___&DESCRIPTION=____&PAY=___&LOCATION=___"
 @app.route("/home")
@@ -65,6 +66,40 @@ def add():
     )''' % (TITLE, DESCRIPTION, PAY, LOCATION))
     db.commit()
     return "TITLE: {} | DESCRIPTION: {} | PAY: {} | LOCATION: {}".format(TITLE, DESCRIPTION, str(PAY), LOCATION)
+
+@app.route('/update/<id>')
+def update(id):
+    db = sqlite3.connect('jobPosts.db')
+    cursor = db.cursor()
+
+    TITLE = request.args.get('TITLE')
+    DESCRIPTION = request.args.get('DESCRIPTION')
+    PAY = request.args.get('PAY')
+    LOCATION = request.args.get('LOCATION')
+
+    cursor.execute('''UPDATE JOBS SET 
+        TITLE="%s",
+        DESCRIPTION="%s",
+        PAY="%s",
+        LOCATION="%s",
+        UPDATED=CURRENT_TIMESTAMP WHERE Id=%s''' % (TITLE, DESCRIPTION, PAY, LOCATION, id))
+    
+    db.commit()
+
+    db.close()
+    return "Updated ID:{} with --> TITLE: {} | DESCRIPTION: {} | PAY: {} | LOCATION: {}".format(id, TITLE, DESCRIPTION, str(PAY), LOCATION)
+
+# @app.route("/delete/<id>")
+# def delete(id):
+#     db = sqlite3.connect('jobPosts.db')
+#     cursor = db.cursor()
+
+#     cursor.execute("DELETE FROM JOBS WHERE Id=%s" % id)
+#     db.commit()
+
+#     db.close()
+#     return "Deleted Entry with ID:{}".format(id)
+
 
 if __name__ == "__main__":
     app.run(debug = True, threaded = True)
