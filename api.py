@@ -39,7 +39,12 @@ def root():
     cursor.execute('SELECT * FROM JOBS')
     data = cursor.fetchall()
     db.close()
+    for row in data:
+        print(row)
     return str(data)
+
+# @
+# def add():
 
 if __name__ == "__main__":
     app.run(debug = True, threaded = True)
