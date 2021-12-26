@@ -2,7 +2,7 @@ from flask import Flask
 from flask import request
 import sqlite3
 import json
-
+import os
 
 app = Flask(__name__)
 
@@ -10,6 +10,19 @@ app = Flask(__name__)
 def createdb():
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
+    if os.path.isfile('jobPosts.db'):
+        cursor.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='JOBS' ''')
+        exists = cursor.fetchone()[0]
+        #if the count is 1, then table exists
+        
+        if exists == 1:          
+            db.close()
+            return ('Database and Table already exists')
+        db.close()
+        return "Database already exists"
+        
+
+
     cursor.execute('''CREATE TABLE IF NOT EXISTS JOBS (
         Id INTEGER PRIMARY KEY, 
         TITLE text NOT NULL, 
@@ -19,23 +32,13 @@ def createdb():
         CREATED TEXT DEFAULT CURRENT_TIMESTAMP,
         UPDATED TEXT DEFAULT CURRENT_TIMESTAMP
     )''')
-
-    # cursor.execute('''INSERT INTO JOBS (TITLE, DESCRIPTION, PAY, LOCATION) VALUES (
-    #     'Tester',
-    #     'I am a Tester',
-    #     10,
-    #     'REMOTE'
-    # )''')
-
-    # db.commit()
-    # cursor.execute('SELECT * FROM JOBS')
-    # data = cursor.fetchall()
+    db.commit()
 
     db.close()
 
     return ("DATABASES CREATED WITH TABLE NAMED: \"JOBS\" ")
 
-"FORMAT : http://127.0.0.1:5000/add?TITLE=___&DESCRIPTION=____&PAY=___&LOCATION=___"
+@app.route("/")
 @app.route("/home")
 def root():
     db = sqlite3.connect('jobPosts.db')
@@ -48,6 +51,8 @@ def root():
 
     return str(data)
 
+
+"FORMAT : http://127.0.0.1:5000/add?TITLE=___&DESCRIPTION=____&PAY=___&LOCATION=___"
 @app.route("/add")
 def add():
     db = sqlite3.connect('jobPosts.db')
@@ -67,6 +72,8 @@ def add():
     db.commit()
     return "TITLE: {} | DESCRIPTION: {} | PAY: {} | LOCATION: {}".format(TITLE, DESCRIPTION, str(PAY), LOCATION)
 
+
+"FORMAT: http://127.0.0.1:5000/update/_id?TITLE=___&DESCRIPTION=___&PAY=___&LOCATION=____"
 @app.route('/update/<id>')
 def update(id):
     db = sqlite3.connect('jobPosts.db')
@@ -76,6 +83,13 @@ def update(id):
     DESCRIPTION = request.args.get('DESCRIPTION')
     PAY = request.args.get('PAY')
     LOCATION = request.args.get('LOCATION')
+
+    cursor.execute("SELECT EXISTS(SELECT 1 FROM JOBS WHERE Id=%s)" % id)
+    exists = cursor.fetchone()[0]
+
+    if exists == 0:
+        db.close()
+        return "Update Not Possible - There is no entry with ID:{}".format(id)
 
     cursor.execute('''UPDATE JOBS SET 
         TITLE="%s",
@@ -94,6 +108,13 @@ def delete(id):
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
 
+    cursor.execute("SELECT EXISTS(SELECT 1 FROM JOBS WHERE Id=%s)" % id)
+    exists = cursor.fetchone()[0]
+
+    if exists == 0:
+        db.close()
+        return "Delete Not Possible - There is no entry with ID:{}".format(id)
+    
     cursor.execute("DELETE FROM JOBS WHERE Id=%s" % id)
     db.commit()
 
