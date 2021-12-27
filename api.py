@@ -1,13 +1,19 @@
 from flask import Flask
 from flask import request
 import sqlite3
-import json
 import os
 
 app = Flask(__name__)
 
 @app.route('/createdb')
 def createdb():
+    '''
+    This endpoint is ti create the database and setup the a table for 
+    all the job postings.
+
+    http://127.0.0.1:5000/createdb
+    '''
+
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
     if os.path.isfile('jobPosts.db'):
@@ -20,8 +26,6 @@ def createdb():
             return ('Database and Table already exists')
         db.close()
         return "Database already exists"
-        
-
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS JOBS (
         Id INTEGER PRIMARY KEY, 
@@ -42,6 +46,17 @@ def createdb():
 @app.route("/get")
 @app.route("/home")
 def root():
+    '''
+    This is the GET endpoint which displays all the entries in the data
+    All the urls listed below work.
+
+    http://127.0.0.1:5000/
+    or 
+    http://127.0.0.1:5000/get
+    or
+    http://127.0.0.1:5000/home
+    '''
+
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
 
@@ -52,9 +67,16 @@ def root():
 
     return str(data)
 
-"FORMAT : http://127.0.0.1:5000/add?TITLE=___&DESCRIPTION=____&PAY=___&LOCATION=___"
 @app.route("/add")
 def add():
+    '''
+    This is the add/create endpoint to add a new entry to the database.
+    The format to add a new entry is below.
+
+    "FORMAT : http://127.0.0.1:5000/add?TITLE=___&DESCRIPTION=____&PAY=___&LOCATION=___"
+
+    '''
+
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
 
@@ -69,12 +91,19 @@ def add():
         %s,
         '%s'
     )''' % (TITLE, DESCRIPTION, PAY, LOCATION))
-    db.commit()
-    return "TITLE: {} | DESCRIPTION: {} | PAY: {} | LOCATION: {}".format(TITLE, DESCRIPTION, str(PAY), LOCATION)
 
-"FORMAT: http://127.0.0.1:5000/update/id?TITLE=___&DESCRIPTION=___&PAY=___&LOCATION=____"
+    db.commit()
+    return "ADDED SUCCESSFULLY \n TITLE: {} | DESCRIPTION: {} | PAY: {} | LOCATION: {}".format(TITLE, DESCRIPTION, str(PAY), LOCATION)
+
 @app.route('/update/<id>')
 def update(id):
+    '''
+    This is the UPDATE endpoint that make any changes to a certain entry based in the id, plus the database 
+    will have the timestamp to the last modified data and time.
+
+    FORMAT: http://127.0.0.1:5000/update/id?TITLE=___&DESCRIPTION=___&PAY=___&LOCATION=____
+    '''
+
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
 
@@ -104,6 +133,12 @@ def update(id):
 
 @app.route("/delete/<id>")
 def delete(id):
+    '''
+    This endpoint is to delete an entry in the database based on the id.
+
+    FORMAT: http://127.0.0.1:5000/delete/id
+    '''
+
     db = sqlite3.connect('jobPosts.db')
     cursor = db.cursor()
 
