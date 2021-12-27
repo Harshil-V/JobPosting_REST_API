@@ -39,6 +39,7 @@ def createdb():
     return ("DATABASES CREATED WITH TABLE NAMED: \"JOBS\" ")
 
 @app.route("/")
+@app.route("/get")
 @app.route("/home")
 def root():
     db = sqlite3.connect('jobPosts.db')
@@ -50,7 +51,6 @@ def root():
     db.close()
 
     return str(data)
-
 
 "FORMAT : http://127.0.0.1:5000/add?TITLE=___&DESCRIPTION=____&PAY=___&LOCATION=___"
 @app.route("/add")
@@ -72,8 +72,7 @@ def add():
     db.commit()
     return "TITLE: {} | DESCRIPTION: {} | PAY: {} | LOCATION: {}".format(TITLE, DESCRIPTION, str(PAY), LOCATION)
 
-
-"FORMAT: http://127.0.0.1:5000/update/_id?TITLE=___&DESCRIPTION=___&PAY=___&LOCATION=____"
+"FORMAT: http://127.0.0.1:5000/update/id?TITLE=___&DESCRIPTION=___&PAY=___&LOCATION=____"
 @app.route('/update/<id>')
 def update(id):
     db = sqlite3.connect('jobPosts.db')
@@ -120,7 +119,6 @@ def delete(id):
 
     db.close()
     return "Deleted Entry with ID:{}".format(id)
-
 
 if __name__ == "__main__":
     app.run(debug = True, threaded = True)
